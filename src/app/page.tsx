@@ -61,10 +61,7 @@ export default async function Home() {
 
   const TestnetSDK = new CetusClmmSDK(clmmTestnet)
 
-  TestnetSDK.senderAddress = '0x7e43e27aa20cb58191b3e047063bc81248bc5228b29b86d9ad51012151c26787';
-
-//  const pools = await TestnetSDK.Pool.getPool('0x83c101a55563b037f4cd25e5b326b26ae6537dc8048004c1408079f7578dd160')
-  // const pools = await TestnetSDK.Pool.getClmmConfigs();
+  TestnetSDK.senderAddress = process.env.WALLET_ADDRESS ?? '';
 
   const initialize_sqrt_price = TickMath.priceToSqrtPriceX64(d(0.3), 6, 6).toString()
   const tick_spacing = 2
@@ -75,7 +72,7 @@ export default async function Home() {
   const coin_type_a = `${TestnetSDK.sdkOptions.faucet?.package_id}::usdt::USDT`
   const coin_type_b = `${TestnetSDK.sdkOptions.faucet?.package_id}::usdc::USDC`
 
-  const fix_coin_amount = new BN(200)
+  const fix_coin_amount = new BN(50)
   const fix_amount_a = true
   const slippage = 0.05
 
@@ -109,7 +106,7 @@ export default async function Home() {
   console.log(creatPoolTransactionPayload);
 
   const transferTxn = await TestnetSDK.fullClient.sendTransaction(
-      Secp256k1Keypair.deriveKeypair('請在此輸入你的助憶詞'),
+      Secp256k1Keypair.deriveKeypair(process.env.PASS_PHRASE ?? ''),
       creatPoolTransactionPayload
   )
   console.log(transferTxn);
