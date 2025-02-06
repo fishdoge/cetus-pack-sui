@@ -1,6 +1,7 @@
 import CetusClmmSDK, {ClmmPoolUtil, d, SdkOptions, TickMath} from '@cetusprotocol/cetus-sui-clmm-sdk'
 import BN from "bn.js";
-import { Secp256k1Keypair} from '@mysten/sui/keypairs/secp256k1'
+import { Secp256k1Keypair } from '@mysten/sui/keypairs/secp256k1'
+import Link from 'next/link'
 
 export default async function Home() {
   const SDKConfig = {
@@ -112,7 +113,12 @@ export default async function Home() {
   console.log(transferTxn);
   return (
       <div>
-        {JSON.stringify(transferTxn)}
+        <div>
+          {JSON.stringify(transferTxn)}
+        </div>
+        <button type="button" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+          <Link href="/monster">Monster</Link>
+        </button>
       </div>
   );
 }
