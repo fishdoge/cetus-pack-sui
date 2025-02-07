@@ -39,8 +39,16 @@ export default async function Home() {
 
 async function RouteWeb(){
   return (
-      <div>
-        {JSON.stringify(transferTxn)}
-      </div>
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
+      <main className="flex-1">
+        <div className="border-b py-4">
+
+          {/* <suiComponent/> */}
+        </div>
+        <ConnectWallet />
+      </main>
+      <footer className="border-t py-6 text-center text-sm text-muted-foreground">Design by, Fishdoge Lab 2025</footer>
+    </div>
   );
 }
