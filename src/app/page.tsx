@@ -23,16 +23,17 @@ const { networkConfig } = createNetworkConfig({
 
 const queryClient = new QueryClient();
 
+// eslint-disable-next-line @next/next/no-async-client-component
 export default async function Home() {
 
   return (
     <QueryClientProvider client={queryClient}>
-    <SuiClientProvider networks={networkConfig} defaultNetwork="mainnet">
-      <WalletProvider>
-        <RouteWeb/>
-      </WalletProvider>
-    </SuiClientProvider>
-  </QueryClientProvider>
+      <SuiClientProvider networks={networkConfig} defaultNetwork="mainnet">
+        <WalletProvider>
+          <RouteWeb/>
+        </WalletProvider>
+      </SuiClientProvider>
+    </QueryClientProvider>
   );
 }
 
@@ -42,7 +43,8 @@ async function RouteWeb(){
       <Navbar />
       <main className="flex-1">
         <div className="border-b py-4">
-          {/* <Search /> */}
+
+          {/* <suiComponent/> */}
         </div>
         <ConnectWallet />
       </main>
