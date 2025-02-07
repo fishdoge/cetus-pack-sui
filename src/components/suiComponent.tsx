@@ -1,17 +1,16 @@
 
-//import CetusClmmSDK, {ClmmPoolUtil, d, SdkOptions, TickMath} from '@cetusprotocol/cetus-sui-clmm-sdk'
-//import BN from "bn.js";
-import { SuiGraphQLClient } from '@mysten/sui/graphql';
-import { graphql } from '@mysten/sui/graphql/schemas/latest';
 import { KioskClient, Network } from '@mysten/kiosk';
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
 import { liquidityInput,amount_a,amount_b,coin_type_a,coin_type_b } from '@/config/sdkConfig'
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Coins, FuelIcon as Gas, Wallet } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useCurrentWallet} from '@mysten/dapp-kit';
 
 
 export default function SuiComponent() {
+
+  const { currentWallet, connectionStatus } = useCurrentWallet();
 
 
   const rpcUrl = getFullnodeUrl("testnet");
@@ -73,7 +72,20 @@ export default function SuiComponent() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold mb-8">Sui Network Dashboard</h1>
-
+      {connectionStatus === 'connected' ? (
+				<div>
+					<div>
+						Accounts:
+						<ul>
+							{currentWallet.accounts.map((account) => (
+								<li key={account.address}>- {account.address}</li>
+							))}
+						</ul>
+					</div>
+				</div>
+			) : (
+				<div>Connection status: {connectionStatus}</div>
+			)}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Liquidity Information */}
         <Card>
