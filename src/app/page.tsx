@@ -43,7 +43,7 @@ function RouteWeb(){
       <Navbar />
       <main className="flex-1">
         <div className="border-b py-4">
-          {/* <SuiComponent/> */}
+          <SuiComponent/>
         </div>
         <ConnectWallet />
       </main>
