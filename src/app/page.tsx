@@ -16,7 +16,7 @@ export default function Home() {
         <div className="border-b py-4">
           <SuiComponent/>
         </div>
-        <ConnectWallet />
+        {/*<ConnectWallet />*/}
       </main>
       <footer className="border-t py-6 text-center text-sm text-muted-foreground">Design by, Fishdoge Lab 2025</footer>
     </div>
