@@ -1,8 +1,15 @@
+
 import CetusClmmSDK, {ClmmPoolUtil, d, SdkOptions, TickMath} from '@cetusprotocol/cetus-sui-clmm-sdk'
 import BN from "bn.js";
 import { Secp256k1Keypair} from '@mysten/sui/keypairs/secp256k1'
+import { Ed25519Keypair} from '@mysten/sui/keypairs/ed25519'
+import { SuiGraphQLClient } from '@mysten/sui/graphql';
+import { graphql } from '@mysten/sui/graphql/schemas/latest';
+import { KioskClient, Network } from '@mysten/kiosk';
+import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
 
-export default async function suiComponent() {
+
+export default async function SuiComponent() {
   const SDKConfig = {
     clmmConfig: {
       pools_id: '0xc090b101978bd6370def2666b7a31d7d07704f84e833e108a969eda86150e8cf',
@@ -25,7 +32,7 @@ export default async function suiComponent() {
     // fullRpcUrl: 'https://testnet.artifact.systems/sui',
     fullRpcUrl: 'https://sui-testnet-endpoint.blockvision.org',
     simulationAccount: {
-      address: '0xcd0247d0b67e53dde69b285e7a748e3dc390e8a5244eb9dd9c5c53d95e4cf0aa',
+      address: '0x25e6a21d3c032479b67448c44f817217791da22d12f4539264df2c884ac4301e',
     },
     faucet: {
       package_id: '0x0588cff9a50e0eaf4cd50d337c1a36570bc1517793fd3303e1513e8ad4d2aa96',
@@ -58,12 +65,15 @@ export default async function suiComponent() {
     swapCountUrl: 'https://api-sui.devcetus.com/v2/sui/pools_info',
   }
 
+  const initialize_price = 0.3
+  const coin_a_decimals = 6
+  const coin_b_decimals = 6
 
   const TestnetSDK = new CetusClmmSDK(clmmTestnet)
 
   TestnetSDK.senderAddress = process.env.WALLET_ADDRESS ?? '';
 
-  const initialize_sqrt_price = TickMath.priceToSqrtPriceX64(d(0.3), 6, 6).toString()
+  const initialize_sqrt_price = TickMath.priceToSqrtPriceX64(d(initialize_price), coin_a_decimals, coin_b_decimals).toString()
   const tick_spacing = 2
   const current_tick_index = TickMath.sqrtPriceX64ToTickIndex(new BN(initialize_sqrt_price))
 
@@ -71,6 +81,11 @@ export default async function suiComponent() {
   const upperTick = TickMath.getNextInitializableTickIndex(new BN(current_tick_index).toNumber(), new BN(tick_spacing).toNumber())
   const coin_type_a = `${TestnetSDK.sdkOptions.faucet?.package_id}::usdt::USDT`
   const coin_type_b = `${TestnetSDK.sdkOptions.faucet?.package_id}::usdc::USDC`
+  //const coin_type_a = '0x2::sui::SUI'
+  //const coin_type_b = '0x2::sui::SUI'
+
+  //console.log(initialize_sqrt_price)
+  //console.log(current_tick_index)
 
   const fix_coin_amount = new BN(50)
   const fix_amount_a = true
@@ -89,7 +104,10 @@ export default async function suiComponent() {
   const amount_a = fix_amount_a ? fix_coin_amount.toNumber() : liquidityInput.tokenMaxA.toNumber()
   const amount_b = fix_amount_a ? liquidityInput.tokenMaxB.toNumber() : fix_coin_amount.toNumber()
 
-  const creatPoolTransactionPayload = await TestnetSDK.Pool.creatPoolTransactionPayload({
+  const pool = TestnetSDK.Pool.getPool('0x83c101a55563b037f4cd25e5b326b26ae6537dc8048004c1408079f7578dd160'/*'0xd4573bdd25c629127d54c5671d72a0754ef47767e6c01758d6dc651f57951e7d'*/)
+  console.log(pool)
+
+  /*const creatPoolTransactionPayload = await TestnetSDK.Pool.creatPoolTransactionPayload({
     tick_spacing: tick_spacing,
     initialize_sqrt_price: initialize_sqrt_price,
     uri: '',
@@ -102,18 +120,122 @@ export default async function suiComponent() {
     tick_lower: lowerTick,
     tick_upper: upperTick,
   })
-  creatPoolTransactionPayload.setGasBudget(100000000);
   console.log(creatPoolTransactionPayload);
+  creatPoolTransactionPayload.setGasBudget(100000000);
+  //console.log(creatPoolTransactionPayload);
 
   const transferTxn = await TestnetSDK.fullClient.sendTransaction(
-      Secp256k1Keypair.deriveKeypair(process.env.PASS_PHRASE ?? ''),
+      Ed25519Keypair.deriveKeypair(process.env.PASS_PHRASE ?? ''),
       creatPoolTransactionPayload
   )
-  console.log(transferTxn);
+  console.log(transferTxn);*/
+
+
+  const gqlClient = new SuiGraphQLClient({
+    url: 'https://sui-mainnet.mystenlabs.com/graphql',
+  });
+  const chainIdentifierQuery = graphql(`
+    query {
+      epoch {
+        referenceGasPrice
+      }
+    }
+  `);
+
+  async function getChainIdentifier() {
+    const result = await gqlClient.query({
+      query: chainIdentifierQuery,
+    });
+    console.log(result)
+    return result;
+  }
+  ///////////
+
+  const rpcUrl = getFullnodeUrl("testnet");
+
+  const client = new SuiClient({ url: rpcUrl });
+
+  async function getNetworkStatus() {
+      const currentEpoch = await client.getLatestSuiSystemState();
+      console.log(currentEpoch)
+  }
+
+  // Now we can use it to create a kiosk Client.
+  const kioskClient = new KioskClient({
+    client,
+    network: Network.TESTNET,
+  });
+
+  // resource https://www.youtube.com/watch?v=yNA6aeNtJR4&t=2s
+  const id = `0x62e2a8d935ce4cefff18ed173d3ae7f1a45b92762388ebe4e1faead76d341763`;
+
+  // You can perform actions, like querying the owned kiosks for an address.
+  const tempKiosk = await kioskClient.getKiosk({
+    id,
+    options: {
+        withKioskFields: true, // this flag also returns the `kiosk` object in the response, which includes the base setup
+        withListingPrices: true, // This flag enables / disables the fetching of the listing prices.
+    }
+  });
+
+
+  /*async function mintFren(address: string) {
+    const { kioskOwnerCaps } = await kioskClient.getOwnedKiosks({ address });
+
+    // Choose the first kiosk for simplicity. We could have extra logic here (e.g. let the user choose, pick a personal one, etc).
+    const cap = kioskOwnerCaps[0];
+
+    const tx = new Transaction();
+    const kioskTx = new KioskTransaction({ transaction: tx, kioskClient, cap });
+
+    // We're mixing the logic here. If the cap is undefined, we create a new kiosk.
+    if (!cap) kioskTx.create();
+
+    // Let's mint a capy here into the kiosk (either a new or an existing one).
+    tx.moveCall({
+      target: `${packageId}::suifrens::mint_app::mint`,
+      arguments: [kioskTx.getKiosk(), kioskTx.getKioskCap()],
+      typeArguments: [capyType],
+    });
+
+    // If we don't have a cap, that means we create a new kiosk for the user in this flow.
+    if (!cap) kioskTx.shareAndTransferCap(address);
+
+    kioskTx.finalize();
+
+    // sign and execute transaction.
+    await signAndExecuteTransaction({ tx: tx });
+  }*/
+
   return (
+    <>
       <div>
-        <div>test</div>
-        {JSON.stringify(transferTxn)}
+        {JSON.stringify(liquidityInput)}
       </div>
+      <div>
+        {JSON.stringify(amount_a)}
+      </div>
+      <div>
+        {JSON.stringify(amount_b)}
+      </div>
+      <div>
+        {JSON.stringify(coin_type_a)}
+      </div>
+      <div>
+        {JSON.stringify(coin_type_b)}
+      </div>
+      <div>
+        {JSON.stringify((await getChainIdentifier()).data?.epoch?.referenceGasPrice)}
+      </div>
+      <div>
+        {/*JSON.stringify((await getNetworkStatus()))*/}
+      </div>
+      <div>
+        {JSON.stringify((await tempKiosk))}
+      </div>
+      <button>
+        fs
+      </button>
+    </>
   );
 }

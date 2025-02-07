@@ -7,7 +7,7 @@ import '@mysten/dapp-kit/dist/index.css';
 
 import { Navbar } from "@/app/navbar";
 import { ConnectWallet } from "@/components/connectWallet"
-//import suiComponent from "@/components/suiComponent"
+import SuiComponent from "@/components/suiComponent"
 
 import dynamic from 'next/dynamic';
 
@@ -24,7 +24,7 @@ const { networkConfig } = createNetworkConfig({
 const queryClient = new QueryClient();
 
 // eslint-disable-next-line @next/next/no-async-client-component
-export default async function Home() {
+export default function Home() {
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -37,14 +37,13 @@ export default async function Home() {
   );
 }
 
-async function RouteWeb(){
+function RouteWeb(){
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-1">
         <div className="border-b py-4">
-
-          {/* <suiComponent/> */}
+          {/* <SuiComponent/> */}
         </div>
         <ConnectWallet />
       </main>
