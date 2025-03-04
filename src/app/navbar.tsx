@@ -8,9 +8,9 @@ import { ConnectButton} from '@mysten/dapp-kit';
 const navigation = [
     { name: 'Home', href: '/' },
     // { name: 'Data Analysis', href: '/analysis' },
-    { name: 'Page1',href: '/page1'},
+    { name: 'GraphQL',href: '/page1'},
     // { name: 'Pump', href: '/pump' },
-    { name: 'Page2',href:'/page2'}
+    { name: 'Kiosk',href:'/page2'}
 ]
 
 export function Navbar() {

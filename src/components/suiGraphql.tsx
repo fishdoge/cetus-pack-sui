@@ -2,13 +2,15 @@
 import { SuiGraphQLClient } from '@mysten/sui/graphql';
 import { graphql } from '@mysten/sui/graphql/schemas/latest';
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
+import { ArrowRight, Coins, FuelIcon as Gas, Wallet } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 
 
 export default async function SuiComponent() {
 
   const gqlClient = new SuiGraphQLClient({
-    url: 'https://sui-mainnet.mystenlabs.com/graphql',
+    url: 'https://sui-testnet.mystenlabs.com/graphql',
   });
   const chainIdentifierQuery = graphql(`
     query {
@@ -23,7 +25,48 @@ export default async function SuiComponent() {
       query: chainIdentifierQuery,
     });
     console.log(result)
-    return result;
+    return result.data?.epoch?.referenceGasPrice;
+  }
+
+  const coinIdentifierQuery = graphql(`
+    query getCoins($owner: SuiAddress!, $first: Int, $cursor: String, $type: String = "0x2::sui::SUI") {
+      address(address: $owner) {
+        address
+        coins(first: $first, after: $cursor, type: $type) {
+          nodes {
+            coinBalance
+            contents {
+              type {
+                repr
+              }
+            }
+            address
+            contents {
+              data
+            }
+            balance(type: $type) {
+              coinType {
+                repr
+              }
+              coinObjectCount
+              totalBalance
+            }
+          }
+        }
+      }
+    }`
+  );
+
+  async function getCoinIdentifier() {
+    const result = await gqlClient.query({
+      query: coinIdentifierQuery,
+      variables: {
+        owner: "0x25e6a21d3c032479b67448c44f817217791da22d12f4539264df2c884ac4301e",
+        type: "0x0588cff9a50e0eaf4cd50d337c1a36570bc1517793fd3303e1513e8ad4d2aa96::usdt::USDT"
+      }
+    });
+    console.log(result)
+    return result.data?.address?.coins?.nodes;
   }
   ///////////
 
@@ -68,7 +111,10 @@ export default async function SuiComponent() {
   return (
     <>
       <div>
-        {JSON.stringify((await getChainIdentifier()).data?.epoch?.referenceGasPrice)}
+        {JSON.stringify((await getChainIdentifier()))}
+      </div>
+      <div>
+        {JSON.stringify((await getCoinIdentifier()))}
       </div>
       <div>
         {/*JSON.stringify((await getNetworkStatus()))*/}
@@ -76,6 +122,24 @@ export default async function SuiComponent() {
       <button>
         fs
       </button>
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Liquidity Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Coins className="h-5 w-5" />
+              Liquidity Information
+            </CardTitle>
+            <CardDescription>Current liquidity pool details</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2">
+              <div className="text-sm font-medium">Liquidity Input:</div>
+              <code className="bg-muted p-2 rounded-md text-sm">{JSON.stringify((await getChainIdentifier()), null, 2)}</code>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </>
   );
 }
