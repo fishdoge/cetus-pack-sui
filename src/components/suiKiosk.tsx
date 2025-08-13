@@ -6,6 +6,8 @@ import { graphql } from '@mysten/sui/graphql/schemas/latest';
 import { KioskClient, Network } from '@mysten/kiosk';
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
 import { clmmTestnet } from '@/config/sdkConfig'
+import { ArrowRight, Coins, FuelIcon as Gas, Wallet } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 
 
@@ -178,11 +180,29 @@ export default async function SuiComponent() {
         {/*JSON.stringify((await getNetworkStatus()))*/}
       </div>
       <div>
-        {JSON.stringify((await tempKiosk))}
+        {/*JSON.stringify((await tempKiosk))*/}
       </div>
       <button>
         fs
       </button>
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Liquidity Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Coins className="h-5 w-5" />
+              Liquidity Information
+            </CardTitle>
+            <CardDescription>Current liquidity pool details</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2">
+              <div className="text-sm font-medium">Liquidity Input:</div>
+              <code className="bg-muted p-2 rounded-md text-sm">{JSON.stringify((await tempKiosk), null, 0)}</code>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </>
   );
 }

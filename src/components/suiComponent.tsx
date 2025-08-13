@@ -69,6 +69,8 @@ export default function SuiComponent() {
     await signAndExecuteTransaction({ tx: tx });
   }*/
 
+    console.log("liquidityInput");
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold mb-8">Sui Network Dashboard</h1>
